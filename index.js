@@ -11,7 +11,7 @@ let connection = mysql.createConnection({
     user: 'root',
     password: 'Desdavon1713!',
     database: 'employee_DB'
-    
+
 });
 
 connection.query = util.promisify(connection.query);
@@ -74,7 +74,26 @@ const initialAction = async () => {
                 break;
         };
     } catch (err) {
-        console.log(err);s
+        console.log(err);
+
+        initialAction();
+    };
+}
+
+//view all of employees
+const employeeView = async () => {
+    console.log('Employee View');
+    try {
+        let query = 'SELECT * FROM employee';
+        connection.query(query, function (err, res) {
+            if (err) throw err;
+            let employeeArray = [];
+            res.forEach(employee => employeeArray.push(employee));
+            console.table(employeeArray);
+            initialAction();
+        });
+    } catch (err) {
+        console.log(err);
         initialAction();
     };
 }
@@ -84,10 +103,10 @@ const departmentView = async () => {
     console.log('Viewing Departments');
     try {
         let query = 'SELECT * FROM department';
-        connect.query(query, function (err, res) {
+        connection.query(query, function (err, res) {
             if (err) throw err;
             let departmentArray = [];
-            res.forEach(department => department.Array.push(department));
+            res.forEach(department => departmentArray.push(department));
             console.table(departmentArray);
             initialAction();
         });
@@ -221,10 +240,10 @@ const roleAdd = async () => {
             {
                 name: 'departmentId',
                 type: 'list',
-                choices: departments.map((departmentsId) => {
+                choices: departments.map((departmentId) => {
                     return {
-                        name: departmentsId.department_name,
-                        value: departmentsId.id
+                        name: departmentId.department_name,
+                        value: departmentId.id
                     }
                 }),
                 message: "What department ID is this role with?"
@@ -237,7 +256,7 @@ const roleAdd = async () => {
                 chosenDepartment = departments[i];
             };
         }
-        let result = await connection.query("INSERT INTO employee set ?", {
+        let result = await connection.query("INSERT INTO role set ?", {
             title: answer.title,
             salary: answer.salary,
             department_id: answer.departmentId
@@ -256,6 +275,8 @@ const roleAdd = async () => {
 const employeeUpdate = async () => {
     try {
         console.log('Employee Update');
+
+        let employees = await connection.query("SELECT * FROM employee");
 
         let employeeSelection = await inquirer.prompt([
             {
