@@ -231,16 +231,65 @@ const roleAdd = async () => {
             }
         ]);
 
-        
-
+        let chosenDepartment;
+        for (i = 0; i < departments.length; i++) {
+            if(departments[i].department_id === answer.choice) {
+                chosenDepartment = departments[i];
+            };
+        }
         let result = await connection.query("INSERT INTO employee set ?", {
-            first_name: answer.firstName,
-            last_name: answer.lastName,
-            role_id: (answer.employeeRoleId),
-            manager_id: (answer.employeeManagerId)
+            title: answer.title,
+            salary: answer.salary,
+            department_id: answer.departmentId
         });
 
-        console.log(`${answer.firstName} ${answer.lastName} added.`);
+        console.log(`${answer.title} added.`);
+        initialAction();
+
+    } catch (err) {
+        console.log(err);
+        initialAction();
+    };
+}
+
+//update roll for specific employee
+const employeeUpdate = async () => {
+    try {
+        console.log('Employee Update');
+
+        let employeeSelection = await inquirer.prompt([
+            {
+                name: 'employee',
+                type: 'list',
+                choices: employees.map((employeeName) => {
+                    return {
+                        name: employeeName.first_name + " " + employeeName.last_name,
+                        value: employeeName.id
+                    }
+                }),
+                message: "Choose an employee to update."
+            },
+        ]);
+
+        let roles = await connection.query("SELECT * FROM role");
+
+        let roleSelection = await inquirer.prompt([
+            {
+                name: 'role',
+                type: 'list',
+                choices: roles.map((roleName) => {
+                    return {
+                        name: roleName.title,
+                        value: roleName.id
+                    }
+                }),
+                message: 'Select the role to update the employee with.'
+            }
+        ]);
+
+        let result = await connection.query("UPDATE employee SET ? where ?", [{ role_id: roleSelection.role }, { id: employeeSelection.employee }]);
+
+        console.log(`The role was successfully added.`);
         initialAction();
 
     } catch (err) {
